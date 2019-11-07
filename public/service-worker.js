@@ -37,6 +37,32 @@ workboxSW.router.registerRoute('https://pwagram-99adf.firebaseio.com/posts.json'
     })
 });
 
+workboxSW.router.registerRoute(function (routeData) {
+  return (routeData.event.request.headers.get('accept').includes('text/html'))
+}, function(args) {
+  return caches.match(args.event.request)
+    .then(function (response) {
+      if (response) {
+        return response;
+      } else {
+        return fetch(args.event.request)
+          .then(function (res) {
+            return caches.open('dynamic')
+              .then(function (cache) {
+                cache.put(args.event.request.url, res.clone());
+                return res;
+              })
+          })
+          .catch(function (err) {
+            return caches.match('/offline.html')
+              .then(function (res) {
+                return res
+              });
+          });
+      }
+    })
+});
+
 workboxSW.precache([
   {
     "url": "404.html",
@@ -60,7 +86,7 @@ workboxSW.precache([
   },
   {
     "url": "service-worker.js",
-    "revision": "69b056eadfa3b16a9bc57b35cf8471f1"
+    "revision": "f016da7d9605d6c99211b96e1ea75861"
   },
   {
     "url": "src/css/app.css",
@@ -104,7 +130,7 @@ workboxSW.precache([
   },
   {
     "url": "sw-base.js",
-    "revision": "c2e8a2d67175a73de471bedc1d232b83"
+    "revision": "117ad17e9898c8b5d4440a43cdd917db"
   },
   {
     "url": "sw.js",
